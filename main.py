@@ -14,6 +14,29 @@ symbol_count = {
     "D": 8
 }
 
+symbol_value = {
+    "A": 5,
+    "B": 4,
+    "C": 3,
+    "D": 2
+}
+
+def check_winnings(columns, lines, bet, values):
+    winnings = 0
+    winning_lines = []
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            winnings += values[symbol] * bet
+            winning_lines.append(line + 1)
+
+    return winnings, winning_lines
+
+
 def get_slot_machine_spin(rows, cols, symbols):
     all_symbols = []
     for symbol, symbol_count in symbols.items():
@@ -21,10 +44,10 @@ def get_slot_machine_spin(rows, cols, symbols):
             all_symbols.append(symbol)
 
     columns = []
-    for col in range(cols):
+    for _ in range(cols):
         column = []
         current_symbols = all_symbols[:]
-        for row in range(rows):
+        for _ in range(rows):
             value = random.choice(current_symbols)
             current_symbols.remove(value)
             column.append(value)
@@ -86,20 +109,35 @@ def bet():
 
     return(amount)
 
-def main():
-    balance = deposit()
+def spin(balance):
     l = lines()
-    b = bet()
-    total_bet = b * l
     while True:
+        b = bet()
+        total_bet = b * l
+
         if total_bet <= balance:
             break
         else:
-            print(f'Your bet is bigger than bet. ({total_bet} > {balance})')
+            print(f'Your bet is bigger than your balance. ({total_bet} > {balance})')
 
     print(f'Your bet is {total_bet}.')
 
     slots = get_slot_machine_spin(ROWS, COLS, symbol_count)
     print_slot_machine(slots)
+    winnings, winning_lines = check_winnings(slots, l, b, symbol_value)
+    print(f"You won {winnings}.")
+    print(f"You won on lines", *winning_lines)
+    return winnings - total_bet
+
+def main():
+    bal = deposit()
+    while True:
+        print(f"Current balance is {bal}")
+        ans = input("Press ENTER to play (q to quit).\n")
+        if ans == "q":
+            break
+        bal += spin(bal)
+    print(f"You left with {bal}")
+
 
 main()
